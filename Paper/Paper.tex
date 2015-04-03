@@ -1,0 +1,78 @@
+\documentclass[letterpaper]{article}
+% Used to do math
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Used to color text (for todos)
+\usepackage{xcolor}
+% for when defining a new command to have to include a space at the end
+\usepackage{xspace}
+% for double space support
+\usepackage{setspace}
+
+% Used to embed pdfs from yEd and other sources
+\usepackage{graphicx}
+% Used to embed gnuplot output into document
+\usepackage{epstopdf}
+\usepackage{pdflscape}
+\usepackage{geometry}
+
+% For figures
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{wrapfig}
+
+% packages for doing elaborate table stuff
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{tabularx}
+% Used to have a table span multiple pages.
+\usepackage{longtable}
+
+% For writing pseudo code
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+
+% for code listings
+\usepackage{listingsutf8}
+
+% Deal with backwards quotes because evidently Latex doesn't know better.
+\usepackage [english]{babel}
+\usepackage [autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
+
+\newcommand{\TODO}[1]{\textcolor{red}{#1}}
+
+\newgeometry{margin=1.125in}
+
+\begin{document}
+
+\title{Deep Learning for Automatic Speech Recognition}
+\author{Ryan Hartsfield \and Garrett Lewellen}
+\date{May 4, 2015}
+
+\maketitle
+
+\doublespacing
+
+\section*{Introduction}
+
+\paragraph{} In this paper we examine two deep learning method for automatic speech recognition: deep neural networks and convolutional neural networks based on the works of \cite{DBLP:journals/taslp/DahlYDA12} and  \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} respectively. \TODO{Ryan TODO}
+
+\section*{Traditional Approach} \TODO{Ryan TODO}
+
+\section*{Deep Neural Networks Approach} \TODO{Garrett TODO}
+
+\section*{Convolutional Neural Networks Approach} \TODO{Ryan TODO}
+
+\section*{Experimental Results} \TODO{Garrett TODO}
+
+\section*{Conclusions} \TODO{Garrett TODO}
+
+\appendix
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
