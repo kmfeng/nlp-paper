@@ -9,6 +9,7 @@
 \usepackage{xspace}
 % for double space support
 \usepackage{setspace}
+\usepackage{mathrsfs}
 
 % Used to embed pdfs from yEd and other sources
 \usepackage{graphicx}
@@ -42,7 +43,13 @@
 \usepackage [autostyle, english = american]{csquotes}
 \MakeOuterQuote{"}
 
-\newcommand{\TODO}[1]{\textcolor{red}{#1}}
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
+\newcommand{\NTS}[1]{\textcolor{yellow}{Note to self: #1}}
+
+\newcommand{\argmax}[1]{\underset{#1}{\text{argmax }}}
+
+\newcommand{\prob}[1]{\mathbb{P}\left( #1 \right)}
+\newcommand{\cprob}[2]{ \prob{#1 \lvert #2} }
 
 \newgeometry{margin=1.125in}
 
@@ -62,7 +69,56 @@
 
 \section*{Traditional Approach} \TODO{Ryan TODO}
 
-\section*{Deep Neural Networks Approach} \TODO{Garrett TODO}
+\section*{Deep Neural Networks Approach} 
+
+\paragraph{} In this section we discuss the work of \cite{DBLP:journals/taslp/DahlYDA12} consisting of a context dependent hidden markov model and deep neural network hybrid architecture (CD-HMM-DNN) for the acoustic model. We will begin with an overview of the general architecture, then explain the the general procedure for training, and conclude with discussion of the algorithms used for pre-training. Discussion of experimental results for this approach are deferred to the results section so that they can be compared to the convolutional neural network approach.
+
+\subsection*{Architecture}
+
+\paragraph{} To motivate their architecture, \cite{DBLP:journals/taslp/DahlYDA12} rely on the standard noisy channel model for speech recognition presented in \cite{jurafskyMartin} where we wish maximize the likelihood of a decoded word sequence given our input audio observations:
+
+\begin{equation}
+\hat{w} = \argmax{w \in \mathscr{L}} \cprob{w}{x} = \argmax{w \in \mathscr{L}} \cprob{x}{w} \prob{w} 
+\label{eqn:asr:def}
+\end{equation}
+
+Where $\prob{w}$ and $\cprob{x}{w}$ represent the language and acoustic models respectively. \cite{jurafskyMartin} state that the language model can be computed via an N-gram approach, but \cite{DBLP:journals/taslp/DahlYDA12} do not state their method, instead the authors put their efforts into explaining their acoustic model:
+
+\begin{equation}
+\cprob{x}{w} = \sum_{q} \cprob{x,q}{w} \cprob{q}{w} \approxeq \max \pi(q_0) \prod_{t = 1}^T a_{q_{t-1} q_t} \prod_{t=0}^T \cprob{x_t}{q_t} 
+\label{eqn:lm:def}
+\end{equation}
+
+Here the acoustic model is viewed as a sequence of transitions between states of tied-state triphones which \cite{DBLP:journals/taslp/DahlYDA12} refer to as senones \TODO{EXPLAIN WHAT SENONES ARE AND WHERE THEY COME FROM AND WHY THEY ARE USEFUL} which gives us the context dependent aspect of the architecture. The model assumes that there is a probability $\pi(q_0)$ for the starting state, probabilities $a_{q_{t-1} q_{t}}$ of transitioning to the state observed at step $t -1$ to step $t$, and finally, the probability of the acoustics given the current state $q_t$. \cite{DBLP:journals/taslp/DahlYDA12} expand this last term further into:
+
+\begin{equation*}
+	\cprob{x_t}{q_t} = \frac{\cprob{q_t}{x_t} \prob{x_t}}{\prob{q_t}}
+	\label{eqn:senone:def}	
+\end{equation*}
+
+Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-frequency cepstral coefficients (MFCCs) based on 11 sampled frames of audio \TODO{EXPLAIN MFCCs AND WHY THEY ARE USEFUL}, $\prob{q_t}$ is the prior probability of the senone, and $\prob{x_t}$ can be ignored since it does not vary based on the decoded word sequence we are trying to find.
+
+\paragraph{} Based on this formalism, \cite{DBLP:journals/taslp/DahlYDA12} chose to use pre-trained deep neural networks to estimate $\cprob{q_t}{x_t}$ using MFCCs as DNN inputs and taking the senone posterior probabilities as DNN outputs. The transitioning between events is bested modeled by hidden markov models whose notation, $\pi, a$, and $q$ appears in Eqn. (\ref{eqn:lm:def}). Now that we have an overview of the general CD-DNN-HMM architecture, we can look at how \cite{DBLP:journals/taslp/DahlYDA12} train their model.
+
+\TODO{\begin{itemize}
+	\item Include figure of architecture?
+	\item \S 10.3 of \cite{jurafskyMartin} discusses Context-dependent Acoustic models: triphones
+	\item \cite{DBLP:conf/interspeech/2014} talks about senone (tied-state triphones)
+\end{itemize}}
+
+\subsection*{Pre-Training}
+
+\TODO{\begin{itemize}
+	\item pre-training / contrastive divergence for RBM
+	\item Hinton's method for DBN
+\end{itemize}}
+
+
+\subsection*{Training}
+
+\TODO{\begin{itemize}
+	\item Go over Algorithm 1 procedure
+\end{itemize}}
 
 \section*{Convolutional Neural Networks Approach} \TODO{Ryan TODO}
 
@@ -71,6 +127,8 @@
 \section*{Conclusions} \TODO{Garrett TODO}
 
 \appendix
+
+\singlespacing
 
 \bibliographystyle{alpha}
 \bibliography{references}
