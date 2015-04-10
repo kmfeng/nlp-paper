@@ -106,6 +106,7 @@ Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-fre
 
 \subsection*{Pre-Training}
 
+
 \TODO{\begin{itemize}
 	\item pre-training / contrastive divergence for RBM
 	\item Hinton's method for DBN
@@ -114,13 +115,45 @@ Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-fre
 
 \subsection*{Training}
 
-\TODO{\begin{itemize}
-	\item Go over Algorithm 1 procedure
-\end{itemize}}
+\paragraph{} Training of the CD-DNN-HMM model consists of roughly a dozen involved steps. We won't elaborate here on the full details of each step, but will instead provide a high-level sketch of the procedure to convey its general mechanics. 
+
+\paragraph{} The first high-level step of the procedure is to initialize the CD-DNN-HMM model. This is done by first training a decision tree to find the best tying of triphone states which are then used to train a CD-GMM-HMM system. Next, the unique tied state triphones are each assigned a unique senone identifier. This mapping will then be used to label each of the tied state triphones. (These identifiers will be used later to refine the DNN.) Finally, the trained CD-GMM-HMM is converted into a CD-DNN-HMM by retaining the triphone and senone structure and HMM parameters. This resulting DNN goes through the pre-training procedure discussed in depth earlier. 
+
+\paragraph{} The next high-level step iteratively refines the CD-DNN-HMM. To do this, first the originally trained CD-GMM-HMM model is used to generate a raw alignment of states \TODO{figure out what it's aligning to} which is then mapped to its corresponding senone identifier. This resulting alignment is then used to refine the DBN by backpropagation. Next, the prior senone probability is estimated based on the number of frames \TODO{elaborate more on these frames somewhere} paired with the senone and the total number of frames. These estimates are then used to refine the HMM transition probabilities to maximize the features. Finally, if this newly estimated parameters do not improve accuracy against a development set, then the training procedure terminates; otherwise, the procedure repeats this high-level step.
+
+\paragraph{} \TODO{Discuss computational time to train}
 
 \section*{Convolutional Neural Networks Approach} \TODO{Ryan TODO}
 
-\section*{Experimental Results} \TODO{Garrett TODO}
+\section*{Experimental Results} 
+
+\subsection*{System Configurations}
+
+\paragraph{} \cite{DBLP:journals/taslp/DahlYDA12} report that their system relies on nationwide language model consisting of 1.5 million trigrams. For their acoustic model, then use a five hidden layer DNN with each layer containing 2,000 hidden units. 
+
+\subsection*{Datasets}
+
+\TODO{Garrett}
+
+\subsection*{Results}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{c|c|c|c|c|c}
+		& & \multicolumn{2}{c|}{Bing Mobile} & \multicolumn{2}{c}{TIMIT}\\
+		& Architecture & Dev. & Test  & Dev. & Test \\
+		\hline
+		\multirow{2}{*}{Sentence Accuracy} & CD-GMM-HMMM & 70.3\% & 68.4\% & & \\
+		& CD-DNN-HMM & 71.8\% & 69.6\% & & \\
+		\hline
+		Phone Error & CNN-HMM  & & &  & 20.07\%
+	\end{tabular}
+	\caption{Accuracy and error rates reported by \cite{DBLP:journals/taslp/DahlYDA12} and \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14}.}
+	\label{tbl:results}
+\end{table}
+
+\paragraph{} Direct comparison of the two systems is complicated by the fact that both papers report different metrics against different datasets. \cite{DBLP:journals/taslp/DahlYDA12} reports a sentence level accuracy rate, while \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} reports the phone error rate.
+
 
 \section*{Conclusions} \TODO{Garrett TODO}
 
