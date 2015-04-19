@@ -109,7 +109,7 @@ Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-fre
 \paragraph{} To understand the pre-training process, it is necessary to discuss Restricted Boltzmann Machines (RBM) and Deep Belief Networks (DBN). RBMs are an undirected bipartite graphical model with Gaussian distributed input nodes in a visible layer connecting to binary nodes in a hidden layer. Every possible arrangement of hidden, $h$, a visible, $v$, nodes is given a energy under the RBM model: 
 
 \begin{equation}
-E(v, h) - b^T v - c^T h - v^T W h
+E(v, h) = - b^T v - c^T h - v^T W h
 \end{equation}
 
 Where $W$ is the weight of connections between nodes and vectors $b$ and $c$ correspond to the visible and hidden biases respectively. The resulting probability is then given by:
