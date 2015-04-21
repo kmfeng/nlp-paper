@@ -386,7 +386,7 @@
 	
 	\vfill
 
-	\hfill George Dahl \hfill Dong Yi \hfill Li Deng \hfill Alex Acero \hfill
+	 $ $ \hfill George Dahl \hfill Dong Yi \hfill Li Deng \hfill Alex Acero \hfill  $ $
 	
 	\vfill
 	
@@ -414,7 +414,7 @@
 	\end{center}
 \end{frame}
 
-\begin{frame}{Problem Formulation (Cont)}
+\begin{frame}{Problem Formulation (cont.)}
 	\begin{center}
 	Here the acoustic model is viewed as a sequence of transitions between states of tied-state triphones referred to as \textbf{senones}.
 	\end{center}
@@ -432,12 +432,13 @@
 		Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-frequency cepstral coefficients (\textbf{MFCCs}) based on 11 sampled frames of audio.
 	\end{center}
 \end{frame}
-	
-\begin{frame}{Deep Neural Networks}
+
+\begin{frame}{Problem Formulation (cont.)}
 	\resizebox{\linewidth}{!}{\includegraphics{dnn.pdf}}
 \end{frame}
 
-\begin{frame}{Training}
+
+\begin{frame}{CD-DNN-HMM Training}
 	\begin{center}
 		Training is complicated and time intensive! At a very high level two steps: initialization and DNN training.
 	\end{center}
@@ -457,35 +458,32 @@
 
 \end{frame}
 
-\begin{frame}{Training}
-
-\vfill
-
-DNN Training:
-
-\begin{itemize}
-	\item Generate raw alignment of states to senones
-	\item Use alignment to refine by backpropagation
-	\item Re-estimate prior senone probability given frames
-	\item Refine HMM transitions probabilities
-	\item Goto first step if no improvement against development set
-\end{itemize}
-
-\vfill
-
-\vfill
-
-\begin{center}
-Just enough time to talk about one of these steps in detail. Let's look at pre-training...
-\end{center}
-
-\vfill
-
-
+\begin{frame}{CD-DNN-HMM Training (cont.)}
+	\vfill
+	
+	DNN Training:
+	
+	\begin{itemize}
+		\item Generate raw alignment of states to senones
+		\item Use alignment to refine by backpropagation
+		\item Re-estimate prior senone probability given frames
+		\item Refine HMM transitions probabilities
+		\item Goto first step if no improvement against development set
+	\end{itemize}
+	
+	\vfill
+	
+	\vfill
+	
+	\begin{center}
+	Just enough time to talk about one of these steps in detail. Let's look at pre-training...
+	\end{center}
+	
+	\vfill
 \end{frame}
 
 
-\begin{frame}{Pre-Training In-Depth}
+\begin{frame}{DNN Pre-Training In-Depth}
 	\vfill
 
 	\begin{center}
@@ -507,7 +505,7 @@ Just enough time to talk about one of these steps in detail. Let's look at pre-t
 	\vfill
 \end{frame}
 
-\begin{frame}{Pre-Training: RBMs and DBNs}
+\begin{frame}{DNN Pre-Training: RBMs and DBNs}
 	\vfill
 
 	\begin{columns}
@@ -534,7 +532,7 @@ Just enough time to talk about one of these steps in detail. Let's look at pre-t
 	\vfill
 \end{frame}
 
-\begin{frame}{Pre-Training: Contrastive Divergence}
+\begin{frame}{DNN Pre-Training: Contrastive Divergence}
 		\begin{center}
 			Want to do vanilla Stochastic Gradient Descent, however, our \textcolor{blue}{model} term takes \textbf{exponential} time to compute correctly. 
 		\end{center}
@@ -544,7 +542,7 @@ Just enough time to talk about one of these steps in detail. Let's look at pre-t
 		\end{equation*}
 		
 		\begin{center}
-			Instead, \textbf{approximate} it (essentially minimizing Kullback-Leibler divergence) with \textcolor{blue}{one step} Gibbs sampling:
+			Instead, \textbf{approximate} it with \textcolor{blue}{one step} Gibbs sampling (essentially minimizing Kullback-Leibler divergence):
 		\end{center}
 		
 		\begin{equation*}
@@ -552,7 +550,7 @@ Just enough time to talk about one of these steps in detail. Let's look at pre-t
 		\end{equation*}
 \end{frame}
 
-\begin{frame}{Pre-Training: Bringing it all together}
+\begin{frame}{DNN Pre-Training: Bringing it all together}
 	\begin{columns}
 		\begin{column}{0.45\linewidth}
 			Hinton's Greedy Algorithm:
@@ -594,32 +592,63 @@ Just enough time to talk about one of these steps in detail. Let's look at pre-t
 \end{frame}
 
 \begin{frame}{Experimental Results}
+	\vfill
+	
+	Metrics
+	\begin{itemize}
+		\item Sentence Error Rate (SER): Incorrect sentences (at least one word wrong) out of total sentences.
+		\item Word Error Rate (WER): Levenshtein based measure of number of substitutions, deletions, and insertions relative to total words.
+		\item Phoneme Error Rate (PER): Incorrect phonemes out of total phonemes
+	\end{itemize}
+	
+	\vfill
+\end{frame}
 
-\begin{table}[H]
+\begin{frame}{Experimental Results (cont.)}
+	\vfill
+	
+	Datasets
+	\begin{itemize}
+		\item Bing Mobile: Corpus of Siri-like spoken questions.
+		\item TIMIT: Corpus from Texas Instruments and Massachusetts Institute of Technology. 630 speakers.
+		\item Switchboard: Corpus from Texas Instruments in 1990. Telephone conversations. 543 speakers.
+	\end{itemize}
+	
+	\vfill
+	
 	\begin{center}
-		Papers report different metrics (sentence accuracy, phone error rate) on different datasets (Bing, TIMIT) 
+		See Linguistic Data Consortium for TIMIT and Switchboard.
 	\end{center}
 	
 	\vfill
+\end{frame}
 
-	\centering
-	\begin{tabular}{c|c|c|c|c}
-		& \multicolumn{2}{c|}{Bing Mobile} & \multicolumn{2}{c}{TIMIT}\\
-		Architecture & Dev. & Test  & Dev. & Test \\
-		\hline
-		CD-GMM-HMMM & 70.3\% & 68.4\% & & \\
-		CD-DNN-HMM & 71.8\% & 69.6\% & & \\
-		\hline
-		CNN-HMM  & & &  & 20.07\%
-	\end{tabular}
+\begin{frame}{Experimental Results}
+	\begin{center}
+		Hinton et al. \textit{Deep Neural Networks for Acoustics Modeling in Speech Recognition: The shared views of four research groups} 
+	\end{center}
+
+	\vfill
+
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c|c|c|c}
+			& Switchboard & Bing Mobile & TIMIT \\
+			& (WER) & (SER) & (PER) \\
+			\hline
+			GMM & 23.6 & 36.2 & 21.7 \\
+			DNN & 16.1 & 30.4 & 21.9 \\
+			CNN & $-$ & $-$ & 20.2 \\
+			\hline
+			RNN & $-$ & $-$ & 17.7
+		\end{tabular}
+	\end{table}
 
 	\vfill
 
 	\begin{center}
-		Take away: Both demonstrate significant improvement over GMM approach, with CNN approach giving the best performance.
+		Takeaway: ANN-based methods perform better than the established GMM approach on multiple datasets and error metrics.
 	\end{center}
-\end{table}
-
 \end{frame}
 
 \begin{frame}
@@ -636,11 +665,26 @@ Just enough time to talk about one of these steps in detail. Let's look at pre-t
 \end{frame}
 
 \begin{frame}{Conclusions}
-	\TODO{Garrett}
-\end{frame}
+	\vfill
 
-\begin{frame}{Conclusions (Cont)}
-	\TODO{Garrett}
+	\begin{center}
+		Neural Networks are promising alternative to GMMs for acoustic modeling in ASR. But they have computational limitations \newline (e.g., not easily parallelizable across clusters)
+	\end{center}
+	
+	\vfill
+	
+	\begin{center}
+		These techniques are in play at Baidu, Google, and Microsoft. No word on Pearson, Nuance, Apple.
+	\end{center}
+
+	\vfill
+
+	\begin{center}
+		Our money on CNNs. They can do more with less (Better results with fewer nodes). Though Hinton critical of the approach.\newline
+		(\textit{What's wrong with convolutional nets?} MIT 2014)
+	\end{center}
+	
+	\vfill
 \end{frame}
 
 \begin{frame}

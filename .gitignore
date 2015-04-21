@@ -48,3 +48,15 @@ Temporary Items
 .blg
 .log
 .gz
+*.aux
+Paper/Paper.bbl
+*.blg
+Paper/Paper.log
+*.gz
+Paper/texput.log
+*.log
+Presentation/Presentation.nav
+*.out
+Presentation/Presentation.snm
+*.gz
+Presentation/Presentation.synctex.gz
