@@ -91,21 +91,87 @@
 		\item Conclusions
 	\end{enumerate}
 \end{frame}
-
 \begin{frame}
+	\frametitle{Speech Recognition}
+	\begin{center}
+		Main goal of any automatic speech recognition system is to take some acoustic signal as input and convert it into a corresponding lexical representation.
+	\end{center}
+	
+	\begin{center}
+		Tasks range from very easy to extremely difficult: Number recognition, phone recognition, large vocabulary speech recognition, human-computer, human-human
+	\end{center}
+	
+	\begin{center}
+		\textbf{Many variable factors to account for}: environmental noise, speaker variation, vocabulary size, degree of fluency, etc.
+	\end{center}
+\end{frame}
+\begin{frame}
+	\frametitle{The ASR Problems}
+	\begin{center}
+		There are \textbf{four} substantial problems that must be solved in any statistical ASR system:
+	\end{center}
 
+	\begin{enumerate}
+		\item Acoustic Processing
+		\item \textcolor{blue}{Acoustic Modeling}
+		\item Language Modeling
+		\item The Search Problem
+	\end{enumerate}
 \end{frame}
 
 \begin{frame}
-
+	\frametitle{Acoustic Processing}
+	\begin{center}
+		Represent acoustic data in a way that has few model parameters, but maintains necessary linguistic information.
+	\end{center}
+	\begin{center}
+		Main form of feature representation are the mel-frequency cepstral coefficients (MFCCs) extracted from a waveform.
+	\end{center}
+	
+	\begin{itemize}
+		\item Convert the spectrum of a window into its cepstrum
+		\item Effectively separates the source from filter
+		\item Cepstral coefficients are uncorrelated
+		\item Use the first 12 (represent the filter), their deltas and delta-deltas for 39 features per frame
+	\end{itemize}
+	
+	\begin{equation*}
+		c[n] = \sum_{n=0}^{N-1}\log(|\sum_{n=0}^{N-1}x[n]e^{-j\frac{2\pi}{N}kn}|)e^{j\frac{2\pi}{N}kn}
+	\end{equation*}
 \end{frame}
 
 \begin{frame}
-
+	\frametitle{Acoustic Modeling}
+	\begin{center}
+		Given the observation feature vector, estimate an HMM state posterior probability: \begin{equation*}
+		\cprob{x}{w}\end{equation*} Where \textit{x} is some acoustic signal as input and \textit{w} is a word, phone, sub-phone, diphone, or triphone. 
+	\end{center}
+	
+	We will explore three ways of estimating this probability:
+	\begin{itemize}
+		\item Gaussian Mixture Models (GMMs)
+		\item Convolutional Neural Networks (CNNs)
+		\item Deep Neural Networks (DNNs)
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-
+	\frametitle{Language Modeling and Search}
+	\begin{center}
+		Job of the language model is to estimate the prior probability:
+		$\prob{w}$
+	\end{center}
+	\begin{center}
+		This is usually done with an N-gram model like we've seen throughout the semester.
+	\end{center}
+	\vfill
+	\begin{center}
+		We normally use GMM-HMM or ANN-HMM hybrids for acoustic/language models. Given these models, we need to find the best sequence of words for the acoustic input.
+	\end{center}
+	\begin{center}
+		Search is normally performed using Viterbi, A* decoding, or N-best.
+	\end{center}
+	
 \end{frame}
 
 \begin{frame}
@@ -122,19 +188,56 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{Gaussian Mixture Models}\TODO{clean up}
+	\begin{center}
+		\includegraphics[scale=.3, clip=true, trim=5cm 9cm 4cm 10cm]{gmm.pdf}
+	\end{center}
+
+	\begin{center}
+		Before the rise of Deep Learning approaches, GMMs were ubiquitous for representing the acoustic model.
+	\end{center}
+	\begin{center}
+		Based on assumption that a mixture of Gaussians can be used to represent the spectral shape.
+	\end{center}	
 
 \end{frame}
 
 \begin{frame}
+	\frametitle{GMM Models}
+	\begin{center}
+		Use a weighted mixture of multivariate Gaussians as a model to assign a likelihood to an acoustic observation.
+	\end{center}
+	
+	\begin{center}
+	Below is the output likelihood function $b_{j}(o_{t})$:
+	\end{center}
+	
+	\begin{equation*}
+	b_{j}(o_{t}) = \sum_{m=1}^{M}c_{jm}\frac{1}{\sqrt{2\pi|\sigma_{jm}|}}\exp[(x-\mu_{jm})^T\sigma_{jm}^{-1}(o_{t}-\mu_{jm})]
+	\end{equation*}
+	
+	\begin{center}
+		A GMM model can be trained using the Baum-Welch algorithm to iteratively recompute the mean, mixture weight, and covariance.
+	\end{center}
 
 \end{frame}
 
 \begin{frame}
-
-\end{frame}
-
-\begin{frame}
-
+	\frametitle{The Rise of Deep Learning}
+	\begin{center}
+		Recently, Artificial Neural Networks (ANNs) have experienced great results in a variety of tasks, and ANN-HMMs have begun to replace GMM-HMMs.
+	\end{center}
+	\begin{itemize}
+		\item Increasing processing power and more efficient algorithms for training.
+		\item GMMs have much fewer model parameters, and are much easier to train.
+		\item ANN-HMM hybrids are much larger, and can take in multiple frames (9-15) 
+		\item GMM-HMMs typically only look at a single frame.
+	\end{itemize}
+	
+	\begin{center}
+		This increase in size allows hybrid ANN-HMMs to model highly correlated features across wide temporal contexts.
+	\end{center}
+	
 \end{frame}
 
 \begin{frame}
@@ -151,19 +254,116 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{Convolutional Neural Networks}
+	\begin{center}
+		\textbf{Convolutional Neural Networks for Speech Recognition}
+	\end{center}
+	
+	\vfill
+	
+	\hfill Ossama Abdel-Hamid \hfill Abdel-rahman Mohamed \hfill Hui Jiang 
+	
+	\hfill Li Deng \hfill Gerald Penn \hfill Dong Yu \hfill
+	
+	\vfill
+	
+	\begin{center}
+		IEEE/ACM Transactions on Audio, Speech, and Language processing, Vol. 22, No. 10, October 2014
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\frametitle{CNN Background}
+	\begin{center}
+		CNNs have achieved high levels of success in image recognition tasks. They have a very complex architecture that is influenced by our own visual cortex.
+	\end{center}
+		\begin{itemize}
+			\item Special layer with a convolution ply and pooling ply (simple cells and complex cells)
+			\item Weights are shared across all neurons in the same convolution ply
+			\item Replicates features across the image in order to recognize patterns anywhere within it
+		\end{itemize}
+\end{frame}
+\begin{frame}
+	\frametitle{CNN-HMM for ASR}
+	\begin{center}
+		Apply a similar architecture to the task of ASR with some differences to help exhibit invariance to small perturbations in frequency caused by different speakers, emotional status, background noise, etc.:
+		\vfill
+		\begin{itemize}
+			\item Local Connectivity: Mel-frequency spectral coefficients (MFSC) features
+			\item Convolutions along frequency axis: HMMs handle time axis, allow for small frequency shifts
+			\item Limited weight sharing: Same pool = Same weights
+		\end{itemize}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Input Structure of the CNN}
+	\includegraphics[scale=0.6, trim=1.1cm 0 0 7.5cm, clip=true]{cnn-input.pdf}
 
 \end{frame}
 
 \begin{frame}
+	\frametitle{Global Architecture}
+	\includegraphics[scale=0.65, trim=2cm 0 0 8cm, clip=true]{cnn-global.pdf}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Convolution Ply}
+	\begin{center}
+		The convolution ply introduces locality into the network. Unlike in image processing, weights are only shared between neurons that go to the same pooling ply. 
+	\end{center}
+	
+	\begin{center}
+		Limited weight sharing is used to reflect the fact that properties of the speech signal vary over different frequency bands. Each frequency band has its own shared weights.
+	\end{center}	
+	\vfill
+	\begin{center}
+		Each unit in a single feature map can be computed as below:
+	\end{center}
+	\begin{equation*}
+	q_{j,m} = \sigma(\sum_{i=1}^{I}\sum_{n=1}^{F}o_{i,n+m-1}w_{i,j,n}+w_{0,j}), (j = 1, ..., J)
+	\end{equation*}
 
 \end{frame}
 
 \begin{frame}
-
+	\frametitle{Pooling Ply}
+	\begin{center}
+		The pooling ply reduces the resolution of the feature maps, serving as a generalization over the features of the convolution ply. This helps with handling small shifts in frequency.
+	\end{center}
+	\begin{center}
+		In this paper they use a simple max-pooling function:
+	\end{center}
+	\begin{equation*}
+	p_{i,m} = \max_{n=1}^{G} q_{i, (m-1)xs+n}
+	\end{equation*}
+	\begin{center}
+		where \textit{G} is the pooling size and \textit{s} is the shift size. If \textit{G = s}, there is no overlap between the pooling windows.
+	\end{center}
+	
 \end{frame}
 
 \begin{frame}
+	\frametitle{A Simpler Example}
+	\includegraphics[scale=1, clip=true, trim=5cm 0 0 10cm]{conv-pool.pdf}
+\end{frame}
 
+\begin{frame}
+	\frametitle{Training with Back-Propagation}
+	\begin{center}
+		Most frequently used training algorithm for ANNs. We want to discover how the output of the ANN changes with respect to the input. Both networks use a softmax output layer to compute the posterior probability:
+		\begin{equation*}
+		y_{i} = \frac{\exp(o_{i}^{(L)})}{\sum_{j}\exp(o_{j}^{(L)})}
+		\end{equation*}
+		Goal is to minimize the cross-entropy function: $Q({W^{(l)}}) = -\sum_{i}d_{i}\log y_{i}$ where \textit{d} is the target and \textit{y} is the prediction.
+		\vfill
+		Compute derivative of Q with respect to each weight matrix, and use stochastic gradient descent to minimize the objective function.
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Back-Propagation cont.}
+	\includegraphics[scale=0.65, trim=2cm 0 0 8cm, clip=true]{backprop.pdf}
 \end{frame}
 
 \begin{frame}

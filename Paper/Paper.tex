@@ -65,9 +65,11 @@
 
 \section*{Introduction}
 
-\paragraph{} In this paper we examine two deep learning method for automatic speech recognition: deep neural networks and convolutional neural networks based on the works of \cite{DBLP:journals/taslp/DahlYDA12} and  \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} respectively. \TODO{Ryan TODO}
+\paragraph{} In this paper we examine two deep learning method for automatic speech recognition: deep neural networks and convolutional neural networks based on the works of \cite{DBLP:journals/taslp/DahlYDA12} and  \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} respectively. \TODO{Ryan - Talk about speech recognition in general, linguistics variations, }
 
-\section*{Traditional Approach} \TODO{Ryan TODO}
+\section*{Traditional Approach} \TODO{Ryan GMM-HMMs}
+
+\paragraph{}
 
 \section*{Deep Neural Networks Approach} 
 
@@ -152,6 +154,38 @@ where $\inAngle{ \cdot }_\text{1}$ is a single step Gibb Sampled expectation. \T
 \paragraph{} \TODO{Discuss computational time to train}
 
 \section*{Convolutional Neural Networks Approach} \TODO{Ryan TODO}
+
+\paragraph{} In this section we explore the work done in \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} on the use of convolutional neural network-hidden markov model hybrid (CNN-HMM) for phone recognition performed on the TIMIT dataset and a large-vocabulary voice search task. In this model, temporal variability is handled by the HMM, while convolutions occur along the frequency axis of the acoustic signal. We will begin by exploring the overall structure of the network, addressing the shape of the input and looking closely at the convolution and pooling plys. Pre-training is similar to that used in \cite{DBLP:journals/taslp/DahlYDA12}, so we will instead focus on the fine-tuning of  parameters using the back-propagation algorithm. We will then transition into the results section where we will compare the performance of the CD-DNN-HMM with that of the CNN-HMM.
+
+\subsection*{Architecture}
+
+\TODO{Go over structure of input, why not MFCCs, why frequency axis}
+
+\paragraph{} Over the past few years, convolutional neural networks have proven to be highly successful in image recognition tasks. Not only have they achieved the highest results on the MNIST character recognition dataset\TODO{cite}, but they've even proven to outstrip hand-crafted object recognition systems on the much more complex ImageNet dataset.
+
+\subsection*{Convolution Ply}
+
+
+\paragraph{}Without padding the input with dummy values, the convolution operation would produce a lower-dimensional feature map where each dimension decreases by the filter size \textit{F} minus one. If this is done, there will be the same number of units in the input feature map as in that of the convolution ply.
+
+
+\subsection*{Pooling Ply}
+
+\paragraph{}The pooling ply in the network acts as a next step from the convolution ply where the resolution of the feature maps is reduced. \TODO{Why is this important}
+
+\paragraph{}The pooling function used in a CNN is normally either one of \textit{averaging} or \textit{maximization}. In this work, a max-pooling function was used throughout the network:
+\begin{equation*}
+p_{i,m} = \max_{n=1}^{G} q_{i, (m-1)xs+n}
+\end{equation*}
+where \textit{G} is the pooling size and \textit{s} is the shift size. If $G=s$, there is no overlap between pooling windows. \TODO{cite for maxpool vs average + 1 sent} \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} decided to vary these independently to discover whether or not this held true for acoustic processing as well. 
+
+\subsection*{Limited Weight Sharing}
+\TODO{Explain why limited compared to image processing method}
+
+\subsection*{Training}
+\TODO{back prop with weight matrices}
+
+\paragraph{}Pre-training of the CNN is also done with RBMs, with some slight modifications to account for both convolution and pooling plies. This results in a CRBM, which will not be covered here. 
 
 \section*{Experimental Results} 
 
