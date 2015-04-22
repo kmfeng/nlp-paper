@@ -132,7 +132,7 @@
 		\item Convert the spectrum of a window into its cepstrum
 		\item Effectively separates the source from filter
 		\item Cepstral coefficients are uncorrelated
-		\item Use the first 12 (represent the filter), their deltas and delta-deltas for 39 features per frame
+		\item Use first 12 (represent the filter) and an energy coefficient, their deltas and delta-deltas for 39 features per frame
 	\end{itemize}
 	
 	\begin{equation*}
@@ -188,18 +188,20 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Gaussian Mixture Models}\TODO{clean up}
+	\frametitle{Gaussian Mixture Models}
 	\begin{center}
-		\includegraphics[scale=.3, clip=true, trim=5cm 9cm 4cm 10cm]{gmm.pdf}
+		\includegraphics[scale=.25, clip=true, trim=0cm 5.5cm 0cm 5cm]{gmm.pdf}
 	\end{center}
 
 	\begin{center}
-		Before the rise of Deep Learning approaches, GMMs were ubiquitous for representing the acoustic model.
+		Before rise of Deep Learning approaches, GMMs were ubiquitous for representing the acoustic model.
 	\end{center}
 	\begin{center}
-		Based on assumption that a mixture of Gaussians can be used to represent the spectral shape.
+		Based on assumption that a mixture of Gaussians can be used to represent the spectral shape of a phone or sub-phone.
 	\end{center}	
-
+	\begin{center}
+		\tiny{Credit: Wikipedia}
+	\end{center}
 \end{frame}
 
 \begin{frame}
@@ -210,12 +212,11 @@
 	
 	\begin{center}
 	Below is the output likelihood function $b_{j}(o_{t})$:
-	\end{center}
 	
 	\begin{equation*}
 	b_{j}(o_{t}) = \sum_{m=1}^{M}c_{jm}\frac{1}{\sqrt{2\pi|\sigma_{jm}|}}\exp[(x-\mu_{jm})^T\sigma_{jm}^{-1}(o_{t}-\mu_{jm})]
 	\end{equation*}
-	
+	\end{center}
 	\begin{center}
 		A GMM model can be trained using the Baum-Welch algorithm to iteratively recompute the mean, mixture weight, and covariance.
 	\end{center}
