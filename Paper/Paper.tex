@@ -109,20 +109,23 @@ Where $\prob{w}$ and $\cprob{x}{w}$ represent the language and acoustic models r
 \label{eqn:lm:def}
 \end{equation}
 
-Here the acoustic model is viewed as a sequence of transitions between states of tied-state triphones which \cite{DBLP:journals/taslp/DahlYDA12} refer to as senones \TODO{EXPLAIN WHAT SENONES ARE AND WHERE THEY COME FROM AND WHY THEY ARE USEFUL. \S 10.3 of \cite{jurafskyMartin} discusses Context-dependent Acoustic models: triphones and \cite{DBLP:conf/interspeech/2014} talks about senone (tied-state triphones)} which gives us the context dependent aspect of the architecture. The model assumes that there is a probability $\pi(q_0)$ for the starting state, probabilities $a_{q_{t-1} q_{t}}$ of transitioning to the state observed at step $t -1$ to step $t$, and finally, the probability of the acoustics given the current state $q_t$. \cite{DBLP:journals/taslp/DahlYDA12} expand this last term further into:
+Here the acoustic model is viewed as a sequence of transitions between states of tied-state triphones which \cite{DBLP:journals/taslp/DahlYDA12} refer to as senones giving us the context dependent aspect of the architecture. \cite{DBLP:conf/interspeech/FerrerLMS14} explains that senones represent the pronunciation of words and are derived by decision trees. By tying triphone states together, this approach is able to avoid having to process a large number of triphones and avoid the likely sparseness of training examples for every possible triphone.
+
+\paragraph{} The model assumes that there is a probability $\pi(q_0)$ for the starting state, probabilities $a_{q_{t-1} q_{t}}$ of transitioning to the state observed at step $t -1$ to step $t$, and finally, the probability of the acoustics given the current state $q_t$. \cite{DBLP:journals/taslp/DahlYDA12} expand this last term further into:
 
 \begin{equation*}
 	\cprob{x_t}{q_t} = \frac{\cprob{q_t}{x_t} \prob{x_t}}{\prob{q_t}}
 	\label{eqn:senone:def}	
 \end{equation*}
 
-Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-frequency cepstral coefficients (MFCCs) based on 11 sampled frames of audio \TODO{EXPLAIN MFCCs AND WHY THEY ARE USEFUL; Jurasky seems to have a good explanation, may need to consult other resources}, $\prob{q_t}$ is the prior probability of the senone, and $\prob{x_t}$ can be ignored since it does not vary based on the decoded word sequence we are trying to find.
+Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-frequency cepstral coefficients (MFCCs) based on 11 sampled frames of audio. While MFCCs come from signal processing, they have proven to be effective features for automatic speech recognition. Based on the power spectrum derived from sample audio frames, MFCCs 
+represent characteristics of the audio that our ears are sensitive to as explained in \cite{adami2010automatic}.  $\prob{q_t}$ is the prior probability of the senone, and $\prob{x_t}$ can be ignored since it does not vary based on the decoded word sequence we are trying to find.
 
-\paragraph{} Based on this formalism, \cite{DBLP:journals/taslp/DahlYDA12} chose to use pre-trained deep neural networks to estimate $\cprob{q_t}{x_t}$ using MFCCs as DNN inputs and taking the senone posterior probabilities as DNN outputs. The transitioning between events is bested modeled by hidden Markov models whose notation, $\pi, a$, and $q$ appears in Eqn. (\ref{eqn:lm:def}). Now that we have an overview of the general CD-DNN-HMM architecture, we can look at how \cite{DBLP:journals/taslp/DahlYDA12} train their model.
+\paragraph{} Based on this formalism, \cite{DBLP:journals/taslp/DahlYDA12} chose to use pre-trained deep neural networks to estimate $\cprob{q_t}{x_t}$ using MFCCs as DNN inputs and taking the senone posterior probabilities as DNN outputs. The transitioning between events is best modeled by hidden markov model whose notation, $\pi, a$, and $q$ appears in Eqn. (\ref{eqn:lm:def}). Now that we have an overview of the general CD-DNN-HMM architecture, we can look at how \cite{DBLP:journals/taslp/DahlYDA12} train their model.
 
 \subsection*{Pre-Training}
 
-\paragraph{} Given the DNN model, we wish to fit the parameters of the model to a training set. This is usually accomplished by minimizing a likelihood function and deploying a gradient descent procedure to update the weights. One complication to this approach is that the likelihood can be computationally expensive for multilayer networks with many nodes rendering the approach unusable. As an alternative, one can attempt to optimize a computationally tractable surrogate to the likelihood. In this case the surrogate is the contrastive divergence developed by \cite{DBLP:journals/neco/Hinton02}. This sidestep enabled \cite{DBLP:journals/neco/HintonOT06} to develop an efficient pre-training process whose results can then be refined using a few iterations of the traditional result. In this portion of the paper we discuss the work of \cite{DBLP:journals/neco/Hinton02} and explain the greedy algorithm of \cite{DBLP:journals/neco/HintonOT06} before going on to discuss the high-level training procedure of \cite{DBLP:journals/taslp/DahlYDA12}.
+\paragraph{} Given the DNN model we wish to fit the parameters of the model to a training set. This is usually accomplished by minimizing a likelihood function and deploying a gradient descent procedure to update the weights. One complication to this approach is that the likelihood can be computationally expensive for multilayer networks with many nodes rendering the approach unusable. As an alternative, one can attempt to optimize a computationally tractable surrogate to the likelihood. In this case the surrogate is the contrastive divergence method developed by \cite{DBLP:journals/neco/Hinton02}. This sidestep enabled \cite{DBLP:journals/neco/HintonOT06} to develop an efficient unsupervised greedy pre-training process whose results can then be refined using a few iterations of the traditional supervised backpropagation approach. In this portion of the paper we discuss the work of \cite{DBLP:journals/neco/Hinton02} and explain the greedy algorithm of \cite{DBLP:journals/neco/HintonOT06} before going on to discuss the high-level training procedure of \cite{DBLP:journals/taslp/DahlYDA12}.
 
 \paragraph{} To understand the pre-training process, it is necessary to discuss Restricted Boltzmann Machines (RBM) and Deep Belief Networks (DBN). RBMs are an undirected bipartite graphical model with Gaussian distributed input nodes in a visible layer connecting to binary nodes in a hidden layer. Every possible arrangement of hidden, $h$, and visible, $v$, nodes is given an energy under the RBM model: 
 
@@ -143,10 +146,10 @@ Where Z is a normalization factor. Based on the assumptions of the RBM, \cite{DB
 \label{eqn:dahlEq7}
 \end{equation}
 
-Where $\sigma$ is an element wise logistic function. \cite{DBLP:journals/taslp/DahlYDA12} argue that Eq. (\ref{eqn:dahlEq7}) allows one to repurpose the RBM parameters to initialize a neural network. Training of the RBM is done by stochastic gradient descent against the negative log likelihood:
+Where $\sigma$ is an element wise logistic function. \cite{DBLP:journals/taslp/DahlYDA12} argue that Eq. (\ref{eqn:dahlEq7}) allows one to repurpose the RBM parameters to initialize a neural network. Training of the RBM is done by stochastic gradient descent against the negative log likelihood since we wish to find a stable energy configuration for the model:
 
 \begin{equation}
-	- \partialDx{\ell(\theta)}{w_{ij}} = \inAngle{ \partialDx{E}{\theta} }_\text{data} - \inAngle{ \partialDx{E}{\theta} }_\text{model}
+	- \partialDx{\ell(\theta)}{w_{ij}} = \inAngle{ v_i h_j }_\text{data} - \inAngle{ v_i h_j }_\text{model}
 \end{equation}
 
 however \cite{DBLP:journals/taslp/DahlYDA12} point out that the gradient of the negative log likelihood cannot be computed exactly since the $\inAngle{ \cdot }_\text{model}$ term takes exponential time. As a result, the contrastive divergence method is used to approximate the derivative:
@@ -155,19 +158,17 @@ however \cite{DBLP:journals/taslp/DahlYDA12} point out that the gradient of the 
 	- \partialDx{\ell(\theta)}{w_{ij}} \approx \inAngle{ v_i h_j }_\text{data} - \inAngle{ v_i h_j }_\text{1}
 \end{equation}
 
-where $\inAngle{ \cdot }_\text{1}$ is a single step Gibb Sampled expectation. \TODO{What is the underscore data term?; How will you explain in terms of what you read in the product of experts papers?; where's the kullback leiber divergence...? }
+where $\inAngle{ \cdot }_\text{1}$ is a single step Gibbs sampled expectation. These terms are expectations in which nodes $i$ and $j$ cooccur given the training data and model. Given this insight, regular stochastic gradient descent can be performed and the parameters of a RBM fitted to training data.
 
-\paragraph{} Now that we have an understanding of RBMs, we can shift our focus to DBNs. A Deep belief network are multilayer models with undirected connections between the top two layers and directed between other layers. To train these models, \cite{DBLP:journals/neco/HintonOT06} had the insight to treat adjacent layers of nodes as RBMs. One starts with the bottom two layers and trains them as though they were a single RBMS. Once those two layers are trained, then the top layer is treated as the input layer of a new RBM with the layer above that layer acting is the hidden layer of the new RBMs. The sliding window over the layers continues until the full DBN is trained. \TODO{Ok... so that's good and all, but where's the connection between DBN and DNN?}
+\paragraph{} Now that we have an understanding of RBMs, we can shift our focus to DBNs. Deep Belief Networks are multilayer models with undirected connections between the top two layers and directed between other layers. To train these models, \cite{DBLP:journals/neco/HintonOT06} had the insight to treat adjacent layers of nodes as RBMs. One starts with the bottom two layers and trains them as though they were a single RBMS. Once those two layers are trained, then that top layer of he RBM is treated as the input layer of a new RBM with the layer above that layer acting is the hidden layer of the new RBMs. The sliding window over the layers continues until the full DBN is trained.  After this, \cite{DBLP:journals/neco/HintonOT06} describe an "up-down" algorithm to further refine the learned weights. The learned parameters of this greedy approach can then be used as the parameters of a DNN as explained earlier.
 
 \subsection*{Training}
 
 \paragraph{} Training of the CD-DNN-HMM model consists of roughly a dozen involved steps. We won't elaborate here on the full details of each step, but will instead provide a high-level sketch of the procedure to convey its general mechanics. 
 
-\paragraph{} The first high-level step of the procedure is to initialize the CD-DNN-HMM model. This is done by first training a decision tree to find the best tying of triphone states which are then used to train a CD-GMM-HMM system. Next, the unique tied state triphones are each assigned a unique senone identifier. This mapping will then be used to label each of the tied state triphones. (These identifiers will be used later to refine the DNN.) Finally, the trained CD-GMM-HMM is converted into a CD-DNN-HMM by retaining the triphone and senone structure and HMM parameters. This resulting DNN goes through the pre-training procedure discussed in depth earlier. 
+\paragraph{} The first high-level step of the procedure is to initialize the CD-DNN-HMM model. This is done by first training a decision tree to find the best tying of triphone states which are then used to train a CD-GMM-HMM system. Next, the unique tied state triphones are each assigned a unique senone identifier. This mapping will then be used to label each of the tied state triphones. (These identifiers will be used later to refine the DNN.) Finally, the trained CD-GMM-HMM is converted into a CD-DNN-HMM by retaining the triphone and senone structure and HMM parameters. This resulting DNN goes through the previously discussed pre-training procedure.
 
-\paragraph{} The next high-level step iteratively refines the CD-DNN-HMM. To do this, first the originally trained CD-GMM-HMM model is used to generate a raw alignment of states \TODO{figure out what it's aligning to} which is then mapped to its corresponding senone identifier. This resulting alignment is then used to refine the DBN by back-propagation. Next, the prior senone probability is estimated based on the number of frames \TODO{elaborate more on these frames somewhere} paired with the senone and the total number of frames. These estimates are then used to refine the HMM transition probabilities to maximize the features. Finally, if these newly estimated parameters do not improve accuracy against a development set, then the training procedure terminates; otherwise, the procedure repeats this high-level step.
-
-\paragraph{} \TODO{Discuss computational time to train}
+\paragraph{} The next high-level step iteratively refines the CD-DNN-HMM. To do this, first the originally trained CD-GMM-HMM model is used to generate a raw alignment of states which is then mapped to its corresponding senone identifier. This resulting alignment is then used to refine the DBN by backpropagation. Next, the prior senone probability is estimated based on the number of frames paired with the senone and the total number of frames. These estimates are then used to refine the HMM transition probabilities to maximize the features. Finally, if this newly estimated parameters do not improve accuracy against a development set, then the training procedure terminates; otherwise, the procedure repeats this high-level step.
 
 \section*{Convolutional Neural Networks Approach}
 
@@ -252,16 +253,17 @@ where $\epsilon$ is the learning rate and the error vector $e^{(l)}$ is computed
 
 \begin{table}[H]
 	\centering
-	\begin{tabular}{c|c|c|c|c|c}
-		& & \multicolumn{2}{c|}{Bing Mobile} & \multicolumn{2}{c}{TIMIT}\\
-		& Architecture & Dev. & Test  & Dev. & Test \\
+	\begin{tabular}{c|c|c|c}
+		& Switchboard & Bing Mobile & TIMIT \\
+		& (WER) & (SER) & (PER) \\
 		\hline
-		\multirow{2}{*}{Sentence Accuracy} & CD-GMM-HMMM & 70.3\% & 68.4\% & & \\
-		& CD-DNN-HMM & 71.8\% & 69.6\% & & \\
+		GMM & 23.6 & 36.2 & 21.7 \\
+		DNN & 16.1 & 30.4 & 21.9 \\
+		CNN & $-$ & $-$ & 20.2 \\
 		\hline
-		Phone Error & CNN-HMM  & & &  & 20.07\%
+		RNN & $-$ & $-$ & 17.7
 	\end{tabular}
-	\caption{Accuracy and error rates reported by \cite{DBLP:journals/taslp/DahlYDA12} and \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14}.}
+	\caption{title}
 	\label{tbl:results}
 \end{table}
 
