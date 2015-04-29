@@ -25,6 +25,10 @@
 
 % packages for doing elaborate table stuff
 \usepackage{array}
+
+%http://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
 \usepackage{multicol}
 \usepackage{multirow}
 \usepackage{tabularx}
@@ -50,6 +54,14 @@
 \newcommand{\prob}[1]{\mathbb{P}\left( #1 \right)}
 \newcommand{\partialDx}[2]{\frac{\partial #1}{ \partial #2  }}
 \newcommand{\inAngle}[1]{\left \langle #1 \right \rangle}
+
+\newcommand{\CNN}{Convolutional Neural Network\xspace}
+\newcommand{\DBN}{Deep Belief Network\xspace}
+\newcommand{\DNN}{Deep Neural Network\xspace}
+\newcommand{\GMM}{Gaussian Mixture Model\xspace}
+\newcommand{\HMM}{Hidden Markov Model\xspace}
+\newcommand{\RBM}{Restricted Boltzmann Machine\xspace}
+\newcommand{\RNN}{Recurrent Neural Network\xspace}
 
 \newgeometry{margin=1.125in}
 
@@ -89,7 +101,7 @@ where $o_{t}$ is an observation vector at time \textit{t}, $\mu_{jm}$ is a mean 
 
 \section*{Deep Neural Networks Approach} 
 
-\paragraph{} In this section we discuss the work on Large-Vocabulary Speech Recognition (LVSR) of \cite{DBLP:journals/taslp/DahlYDA12} consisting of a context dependent hidden Markov model and deep neural network hybrid architecture (CD-HMM-DNN) for the acoustic model. We will begin with an overview of the general architecture, then explain the algorithms used for pre-training, and conclude with a discussion on the general procedure for training. Discussion of experimental results for this approach are deferred to the results section so that they can be compared to the convolutional neural network approach.
+\paragraph{} In this section we discuss the work on Large-Vocabulary Speech Recognition (LVSR) of \cite{DBLP:journals/taslp/DahlYDA12} consisting of a context dependent \HMM and \DNN hybrid architecture (CD-HMM-DNN) for the acoustic model. We will begin with an overview of the general architecture, then explain the algorithms used for pre-training, and conclude with a discussion on the general procedure for training. Discussion of experimental results for this approach are deferred to the results section so that they can be compared to the \CNN approach.
 
 \subsection*{Architecture}
 
@@ -119,13 +131,13 @@ Here the acoustic model is viewed as a sequence of transitions between states of
 Where $\cprob{x_t}{q_t}$ models the tied triphone senone posterior given mel-frequency cepstral coefficients (MFCCs) based on 11 sampled frames of audio. While MFCCs come from signal processing, they have proven to be effective features for automatic speech recognition. Based on the power spectrum derived from sample audio frames, MFCCs 
 represent characteristics of the audio that our ears are sensitive to as explained in \cite{adami2010automatic}.  $\prob{q_t}$ is the prior probability of the senone, and $\prob{x_t}$ can be ignored since it does not vary based on the decoded word sequence we are trying to find.
 
-\paragraph{} Based on this formalism, \cite{DBLP:journals/taslp/DahlYDA12} chose to use pre-trained deep neural networks to estimate $\cprob{q_t}{x_t}$ using MFCCs as DNN inputs and taking the senone posterior probabilities as DNN outputs. The transitioning between events is best modeled by hidden markov model whose notation, $\pi, a$, and $q$ appears in Eqn. (\ref{eqn:lm:def}). Now that we have an overview of the general CD-DNN-HMM architecture, we can look at how \cite{DBLP:journals/taslp/DahlYDA12} train their model.
+\paragraph{} Based on this formalism, \cite{DBLP:journals/taslp/DahlYDA12} chose to use a pre-trained \DNN to estimate $\cprob{q_t}{x_t}$ using MFCCs as DNN inputs and taking the senone posterior probabilities as DNN outputs. The transitioning between events is best modeled by hidden markov model whose notation, $\pi, a$, and $q$ appears in Eqn. (\ref{eqn:lm:def}). Now that we have an overview of the general CD-DNN-HMM architecture, we can look at how \cite{DBLP:journals/taslp/DahlYDA12} train their model.
 
 \subsection*{Pre-Training}
 
 \paragraph{} Given the DNN model we wish to fit the parameters of the model to a training set. This is usually accomplished by minimizing a likelihood function and deploying a gradient descent procedure to update the weights. One complication to this approach is that the likelihood can be computationally expensive for multilayer networks with many nodes rendering the approach unusable. As an alternative, one can attempt to optimize a computationally tractable surrogate to the likelihood. In this case the surrogate is the contrastive divergence method developed by \cite{DBLP:journals/neco/Hinton02}. This sidestep enabled \cite{DBLP:journals/neco/HintonOT06} to develop an efficient unsupervised greedy pre-training process whose results can then be refined using a few iterations of the traditional supervised backpropagation approach. In this portion of the paper we discuss the work of \cite{DBLP:journals/neco/Hinton02} and explain the greedy algorithm of \cite{DBLP:journals/neco/HintonOT06} before going on to discuss the high-level training procedure of \cite{DBLP:journals/taslp/DahlYDA12}.
 
-\paragraph{} To understand the pre-training process, it is necessary to discuss Restricted Boltzmann Machines (RBM) and Deep Belief Networks (DBN). RBMs are an undirected bipartite graphical model with Gaussian distributed input nodes in a visible layer connecting to binary nodes in a hidden layer. Every possible arrangement of hidden, $h$, and visible, $v$, nodes is given an energy under the RBM model: 
+\paragraph{} To understand the pre-training process, it is necessary to discuss the \RBM (RBM) and \DBN (DBN) models. RBMs are an undirected bipartite graphical model with Gaussian distributed input nodes in a visible layer connecting to binary nodes in a hidden layer. Every possible arrangement of hidden, $h$, and visible, $v$, nodes is given an energy under the RBM model: 
 
 \begin{equation}
 E(v, h) = - b^T v - c^T h - v^T W h
@@ -144,7 +156,7 @@ Where Z is a normalization factor. Based on the assumptions of the RBM, \cite{DB
 \label{eqn:dahlEq7}
 \end{equation}
 
-Where $\sigma$ is an element wise logistic function. \cite{DBLP:journals/taslp/DahlYDA12} argue that Eq. (\ref{eqn:dahlEq7}) allows one to repurpose the RBM parameters to initialize a neural network. Training of the RBM is done by stochastic gradient descent against the negative log likelihood since we wish to find a stable energy configuration for the model:
+Where $\sigma$ is an element-wise logistic function. \cite{DBLP:journals/taslp/DahlYDA12} argue that Eq. (\ref{eqn:dahlEq7}) allows one to repurpose the RBM parameters to initialize a neural network. Training of the RBM is done by stochastic gradient descent against the negative log likelihood since we wish to find a stable energy configuration for the model:
 
 \begin{equation}
 	- \partialDx{\ell(\theta)}{w_{ij}} = \inAngle{ v_i h_j }_\text{data} - \inAngle{ v_i h_j }_\text{model}
@@ -158,7 +170,7 @@ however \cite{DBLP:journals/taslp/DahlYDA12} point out that the gradient of the 
 
 where $\inAngle{ \cdot }_\text{1}$ is a single step Gibbs sampled expectation. These terms are expectations in which nodes $i$ and $j$ cooccur given the training data and model. Given this insight, regular stochastic gradient descent can be performed and the parameters of a RBM fitted to training data.
 
-\paragraph{} Now that we have an understanding of RBMs, we can shift our focus to DBNs. Deep Belief Networks are multilayer models with undirected connections between the top two layers and directed between other layers. To train these models, \cite{DBLP:journals/neco/HintonOT06} had the insight to treat adjacent layers of nodes as RBMs. One starts with the bottom two layers and trains them as though they were a single RBMS. Once those two layers are trained, then that top layer of he RBM is treated as the input layer of a new RBM with the layer above that layer acting is the hidden layer of the new RBMs. The sliding window over the layers continues until the full DBN is trained.  After this, \cite{DBLP:journals/neco/HintonOT06} describe an "up-down" algorithm to further refine the learned weights. The learned parameters of this greedy approach can then be used as the parameters of a DNN as explained earlier.
+\paragraph{} Now that we have an understanding of RBMs, we can shift our focus to DBNs. A \DBN is a multilayer model with undirected connections between the top two layers and directed between other layers. To train these models, \cite{DBLP:journals/neco/HintonOT06} had the insight to treat adjacent layers of nodes as RBMs. One starts with the bottom two layers and trains them as though they were a single RBM. Once those two layers are trained, then the top layer of the RBM is treated as the input layer of a new RBM with the layer above that layer acting as the hidden layer of the new RBM. The sliding window over the layers continues until the full DBN is trained.  After this, \cite{DBLP:journals/neco/HintonOT06} describe an "up-down" algorithm to further refine the learned weights. The learned parameters of this greedy approach can then be used as the parameters of a DNN as explained earlier.
 
 \subsection*{Training}
 
@@ -253,8 +265,8 @@ These error metrics often coincide with different datasets, in particular WER is
 
 \begin{table}[H]
 	\centering
-	\begin{tabular}{c|c|c|c}
-		& Switchboard & Bing Mobile & TIMIT \\
+	\begin{tabular}{c|C{1in}|C{1in}|C{1in}}
+		& Switchboard & BMVS & TIMIT \\
 		& (WER) & (SER) & (PER) \\
 		\hline
 		GMM & 23.6 \textsuperscript{[2]} & 36.2 \textsuperscript{[1]} & 21.7 \textsuperscript{[2]} \\
@@ -267,13 +279,13 @@ These error metrics often coincide with different datasets, in particular WER is
 	\label{tbl:results}
 \end{table}
 
-\paragraph{} Direct comparison of system is complicated by the variety of error metrics and datasets; we rely on \cite{DBLP:journals/spm/X12a} to fill in some gaps between our two selected papers to make a meaningful comparison. As one can see, the neural network approaches do better on average over the traditional GMM approach. To illustrate that it is not only DNN and CNN approaches that do better, we include the work of \cite{DBLP:conf/icassp/GravesMH13} on Recurrent Neural Networks (RNN) to further drive the point that general neural network architectures are viable alternatives to GMMs.
+\paragraph{} Direct comparison of system is complicated by the variety of error metrics and datasets; we rely on \cite{DBLP:journals/spm/X12a} to fill in some gaps between our two selected papers to make a meaningful comparison. As one can see from Table (\ref{tbl:results}), the neural network approaches do better on average over the traditional GMM approach. To illustrate that it is not only DNN and CNN approaches that do better, we include the work of \cite{DBLP:conf/icassp/GravesMH13} using a \RNN (RNN) to further drive the point that general neural network architectures are viable alternatives to GMMs.
 
 \section*{Conclusions}
 
 \paragraph{} Both \cite{DBLP:journals/taslp/DahlYDA12} and \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} have shown that neural network architectures exhibit better performance over Gaussian mixture models. \cite{DBLP:journals/taslp/DahlYDA12} believes that a more capable first layer model provided by mean-covariance restricted Boltzmann machines will increase performance, while \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} plans to investigate unexpected improvements in large-scale speech recognition where they were absent in phone recognition tasks when using convolutional restricted Boltzmann machines. Both routes seem promising and are likely to produce improved error rates.
 
-\paragraph{} In \cite{DBLP:journals/spm/X12a}, the authors of both research groups suggest key gains will come from improved understanding of the pre-training process and how the types of units used in these models affect error rates. They conclude that distributed training is the largest hurdle to overcome for these systems so that more training data can be used efficiently. (Parallelization is limited by the sequential stochastic gradient descent at the heart of the pre-training and training processes.) As \cite{DBLP:journals/taslp/DahlYDA12} point out in their paper, GPU-based approaches can assist in reducing computation time, but more foundational approaches need to be pursued. 
+\paragraph{} In \cite{DBLP:journals/spm/X12a}, the authors of both research groups suggest key gains will come from improved understanding of the pre-training process and how the types of units used in these models affect error rates. They conclude that distributed training is the largest hurdle to overcome for these systems to make use of more training data. (Parallelization is limited by the sequential stochastic gradient descent at the heart of the pre-training and training processes.) As \cite{DBLP:journals/taslp/DahlYDA12} point out in their paper, GPU-based approaches can assist in reducing computation time, but more foundational approaches need to be pursued. 
 
 \paragraph{} Based on what we've read, we believe that \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14}'s convolutional neural network approach is better equipped to handle the speech recognition task. \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} have shown that better phoneme error rates can be obtained using fewer nodes and layers compared to the deep neural network approach of \cite{DBLP:journals/taslp/DahlYDA12}. Though, \cite{DBLP:conf/icassp/GravesMH13}'s recurrent neural network approach provides better performance over both suggesting that today's best of breed may easily be replaced tomorrow with something better.
 
