@@ -93,8 +93,6 @@ where $o_{t}$ is an observation vector at time \textit{t}, $\mu_{jm}$ is a mean 
 
 \subsection*{Architecture}
 
-\TODO{Include figure of architecture?}
-
 \paragraph{} To motivate their architecture, \cite{DBLP:journals/taslp/DahlYDA12} rely on the standard noisy channel model for speech recognition presented in \cite{jurafskyMartin} where we wish to maximize the likelihood of a decoded word sequence given our input audio observations:
 
 \begin{equation}
@@ -241,13 +239,17 @@ where $\epsilon$ is the learning rate and the error vector $e^{(l)}$ is computed
 
 \subsection*{System Configurations}
 
-\paragraph{} \cite{DBLP:journals/taslp/DahlYDA12} report that their system relies on nationwide language model consisting of 1.5 million trigrams. For their acoustic model, then use a five hidden layer DNN with each layer containing 2,000 hidden units. 
+\paragraph{} \cite{DBLP:journals/taslp/DahlYDA12} report that their system relies on nationwide language model consisting of 1.5 million trigrams. For their acoustic model, then use a five hidden layer DNN with each layer containing 2,048 hidden units. Training the system from scratch on 24 hours of training data takes four days on a Dell T3500 workstation with an NVIDIA Tesla GPU. \cite{DBLP:journals/taslp/DahlYDA12} emphasize the importance of the GPU in obtaining acceptable training time, and that without it, training time would be 30x slower.
 
-\TODO{Add in CNN details (Full weight vs. limited weight sharing)}
+\cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} use just one convolution and pooling ply, and two 1000 unit, fully connected hidden layers in their experimental section. They Also make use of 150 feature maps for full weight sharing, and 80 feature maps for limited weight sharing. They do not explain their hardware resources or how long their training time took.
 
-\subsection*{Datasets}
+\TODO{Ryan verify CNN portion.)}
 
-\TODO{Garrett}
+\subsection*{Datasets and Metrics}
+
+Comparison of automatic speech recognition system consists of three principle error metrics: sentence (SER), word (WER), and phoneme (PER) error rates. These look at the ratio of incorrect entities to the number of total entities with the exception of word error rate which uses a Levenshtein approach to measure the number of insertions, substitutions, and deletions. A sentence is considered incorrect if there is at least one incorrect word. 
+
+These error metrics often coincide with different datasets, in particular WER is reported for Switchboard, SER for Bing Mobile Voice Search (BMVS), and PER on TIMIT. Switchboard is a collection of phone conversations between two people, while BMVS is a collection of short spoken questions such as "The Med" or "Chautauqua Park" that are used to find these locations, while TIMIT is a phonetic focused corpus of spoken sentences that are phonetically rich.
 
 \subsection*{Results}
 
@@ -257,19 +259,30 @@ where $\epsilon$ is the learning rate and the error vector $e^{(l)}$ is computed
 		& Switchboard & Bing Mobile & TIMIT \\
 		& (WER) & (SER) & (PER) \\
 		\hline
-		GMM & 23.6 & 36.2 & 21.7 \\
-		DNN & 16.1 & 30.4 & 21.9 \\
-		CNN & $-$ & $-$ & 20.2 \\
+		GMM & 23.6 \textsuperscript{[2]} & 36.2 \textsuperscript{[1]} & 21.7 \textsuperscript{[2]} \\
+		DNN & 16.1 \textsuperscript{[2]} & 30.4 \textsuperscript{[1]} & 21.9 \textsuperscript{[3]} \\
+		CNN & $-$ & $-$ & 20.2 \textsuperscript{[3]} \\
 		\hline
-		RNN & $-$ & $-$ & 17.7
+		RNN & $-$ & $-$ & 17.7 \textsuperscript{[4]}
 	\end{tabular}
-	\caption{title}
+	\caption{Comparison of different architectures on different datasets and their corresponding datasets as reported from the following sources: [1] \cite{DBLP:journals/taslp/DahlYDA12}, [2] \cite{DBLP:journals/spm/X12a}, [3] \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14}, [4] \cite{DBLP:conf/icassp/GravesMH13}. }
 	\label{tbl:results}
 \end{table}
 
-\paragraph{} Direct comparison of the two systems is complicated by the fact that both papers report different metrics against different datasets. \cite{DBLP:journals/taslp/DahlYDA12} reports a sentence level accuracy rate, while \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} reports the phone error rate.
+\paragraph{} Direct comparison of system is complicated by the variety of error metrics and datasets; we rely on \cite{DBLP:journals/spm/X12a} to fill in some gaps between our two selected papers to make a meaningful comparison. As one can see, the neural network approaches do better on average over the traditional GMM approach. To illustrate that it is not only DNN and CNN approaches that do better, we include the work of \cite{DBLP:conf/icassp/GravesMH13} on Recurrent Neural Networks (RNN) to further drive the point that general neural network architectures are viable alternatives to GMMs.
 
-\section*{Conclusions} \TODO{Garrett TODO}
+\section*{Conclusions}
+
+\paragraph{} Both \cite{DBLP:journals/taslp/DahlYDA12} and \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} have shown that neural network architectures exhibit better performance over Gaussian mixture models. \cite{DBLP:journals/taslp/DahlYDA12} believes that a more capable first layer model provided by mean-covariance restricted Boltzmann machines will increase performance, while \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} plans to investigate unexpected improvements in large-scale speech recognition where they were absent in phone recognition tasks when using convolutional restricted Boltzmann machines. Both routes seem promising and are likely to produce improved error rates.
+
+\paragraph{} In \cite{DBLP:journals/spm/X12a}, the authors of both research groups suggest key gains will come from improved understanding of the pre-training process and how the types of units used in these models affect error rates. They conclude that distributed training is the largest hurdle to overcome for these systems so that more training data can be used efficiently. (Parallelization is limited by the sequential stochastic gradient descent at the heart of the pre-training and training processes.) As \cite{DBLP:journals/taslp/DahlYDA12} point out in their paper, GPU-based approaches can assist in reducing computation time, but more foundational approaches need to be pursued. 
+
+\paragraph{} Based on what we've read, we believe that \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14}'s convolutional neural network approach is better equipped to handle the speech recognition task. \cite{DBLP:journals/taslp/Abdel-HamidMJDPY14} have shown that better phoneme error rates can be obtained using fewer nodes and layers compared to the deep neural network approach of \cite{DBLP:journals/taslp/DahlYDA12}. Though, \cite{DBLP:conf/icassp/GravesMH13}'s recurrent neural network approach provides better performance over both suggesting that today's best of breed may easily be replaced tomorrow with something better.
+
+\paragraph{} In a 2014 talk \cite{self:hinton14}, Hinton criticizes existing neural network architectures on philosophical grounds arguing that they do not correspond well enough to how the brain functions citing inadequate structural complexity. His proposed solution is a new neural network approach that clusters neurons together into capsules, which he believes will better model how the cortical columns of the brain behave. If Hinton is right (which his track record suggests), then it is likely we'll see this capsule approach outperform existing models, and consequently, yield improved error rates in automatic speech recognition.
+
+
+
 
 \appendix
 
